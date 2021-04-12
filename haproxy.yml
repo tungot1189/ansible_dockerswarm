@@ -1,0 +1,27 @@
+---
+# - name: deploy haproxy
+#   hosts: haproxy
+#   become: true
+#   become_method: sudo
+#   tasks:
+#     - include_vars: "{{playbook_dir}}/config.yml"
+#     - import_role:
+#         name: haproxy
+
+- name: generate letsencrypt certificates
+  hosts: haproxy
+  become: true
+  become_method: sudo
+  tasks:
+    - include_vars: "{{playbook_dir}}/config.yml"
+    - import_role:
+        name: letsencrypt
+
+- name: deploy haproxy
+  hosts: haproxy
+  become: true
+  become_method: sudo
+  tasks:
+    - include_vars: "{{playbook_dir}}/config.yml"
+    - import_role:
+        name: haproxy
