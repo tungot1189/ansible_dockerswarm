@@ -1,0 +1,30 @@
+---
+- name: check if swarm has already been initialized
+  shell: docker node ls
+  register: swarm_status
+  ignore_errors: true
+
+- name: "get docker info"
+  command: docker info
+  register: docker_info
+  changed_when: false
+
+- name: show docker info
+  debug: var=docker_info.stdout
+
+- name: add workers to the swarm
+  vars:
+    token: "{{ hostvars[groups['managers'][0]]['worker_token']['stdout'] }}"
+    master: "{{ hostvars[groups['managers'][0]]['inventory_hostname'] }}"
+  command: docker swarm join --token {{ token }} {{ master }}:2377
+  when: >
+        'Swarm: active' not in docker_info.stdout and
+        'Swarm: pending' not in docker_info.stdout
+  register: worker
+
+- name: show results
+  debug: var=worker.stdout
+
+- name: show errors
+  debug: var=worker.stdout
+  
